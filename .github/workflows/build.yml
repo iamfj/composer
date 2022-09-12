@@ -1,0 +1,90 @@
+name: Build and Publish
+
+on:
+  push:
+    branches: [ "main" ]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+jobs:
+  build-latest:
+    runs-on: ubuntu-latest
+    env:
+      composer: 2
+      php: 8.1
+    steps:
+      - uses: actions/checkout@v3
+      - name: Login to registry
+        run: echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u ${{ github.repository_owner }} --password-stdin
+      - name: Build docker image
+        run: |
+          docker build \
+            --target=composer-with-extensions \
+            --label "org.opencontainers.image.created"="$(date +"%Y-%m-%dT%H:%M:%S%:z")" \
+            --label "org.opencontainers.image.authors"="${{ github.repository_owner }}" \
+            --label "org.opencontainers.image.url"="${{ github.repositoryUrl }}" \
+            --label "org.opencontainers.image.documentation"="${{ github.repositoryUrl }}/README.md" \
+            --label "org.opencontainers.image.source"="${{ github.repositoryUrl }}" \
+            --label "org.opencontainers.image.version"="${{ matrix.composer }}-${{ matrix.php }}" \
+            --label "org.opencontainers.image.revision"="${{ github.sha }}" \
+            --label "org.opencontainers.image.vendor"="${{ github.repository_owner }}" \
+            --label "org.opencontainers.image.licenses"="MIT" \
+            --label "org.opencontainers.image.title"="Composer ${{ matrix.composer }} (build with PHP ${{ matrix.php }})" \
+            --label "org.opencontainers.image.description"="This docker image of composer contains composer with the most used php extensions." \
+            --build-arg PHP_VERSION=${{ matrix.php }} \
+            --build-arg COMPOSER_VERSION=${{ matrix.composer }} \
+            --tag "ghcr.io/iamfj/composer/php-${{ matrix.php }}/composer:latest" \
+            .
+      - name: Publish docker image
+        run: docker push --all-tags
+
+  build-matrix:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        composer:
+          - 1
+          - 1.10
+          - 1.10.26
+          - 2
+          - 2.2
+          - 2.2.18
+          - 2.3
+          - 2.3.10
+          - 2.4
+          - 2.4.1
+        php:
+          - 7
+          - 7.4
+          - 7.4.30
+          - 8
+          - 8.0
+          - 8.0.23
+          - 8.1
+          - 8.1.10
+    steps:
+      - uses: actions/checkout@v3
+      - name: Login to registry
+        run: echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u ${{ github.repository_owner }} --password-stdin
+      - name: Build docker image
+        run: |
+          docker build \
+            --target=composer-with-extensions \
+            --label "org.opencontainers.image.created"="$(date +"%Y-%m-%dT%H:%M:%S%:z")" \
+            --label "org.opencontainers.image.authors"="${{ github.repository_owner }}" \
+            --label "org.opencontainers.image.url"="${{ github.repositoryUrl }}" \
+            --label "org.opencontainers.image.documentation"="${{ github.repositoryUrl }}/README.md" \
+            --label "org.opencontainers.image.source"="${{ github.repositoryUrl }}" \
+            --label "org.opencontainers.image.version"="${{ matrix.composer }}-${{ matrix.php }}" \
+            --label "org.opencontainers.image.revision"="${{ github.sha }}" \
+            --label "org.opencontainers.image.vendor"="${{ github.repository_owner }}" \
+            --label "org.opencontainers.image.licenses"="MIT" \
+            --label "org.opencontainers.image.title"="Composer ${{ matrix.composer }} (build with PHP ${{ matrix.php }})" \
+            --label "org.opencontainers.image.description"="This docker image of composer contains composer with the most used php extensions." \
+            --build-arg PHP_VERSION=${{ matrix.php }} \
+            --build-arg COMPOSER_VERSION=${{ matrix.composer }} \
+            --tag "ghcr.io/iamfj/composer/php-${{ matrix.php }}/composer:${{ matrix.composer }}" \
+            .
+      - name: Publish docker image
+        run: docker push --all-tags
