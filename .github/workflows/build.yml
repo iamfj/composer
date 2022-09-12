@@ -68,7 +68,7 @@ jobs:
         if: ${{ env.LATEST_COMPOSER == matrix.composer }} && ${{ env.LATEST_PHP == matrix.php }}
         run: docker tag ghcr.io/iamfj/composer/php-${{ matrix.php }}/composer:${{ matrix.composer }} ghcr.io/iamfj/composer/php-latest/composer:latest
       - name: Publish docker images
-        run: docker push --all-tags ghcr.io/iamfj/composer/php-${{ matrix.php }}/composer:${{ matrix.composer }}
+        run: docker push --all-tags ghcr.io/iamfj/composer/php-${{ matrix.php }}/composer
       - name: Publish latest php images
         if: ${{ env.LATEST_PHP == matrix.php }}
         run: docker push --all-tags ghcr.io/iamfj/composer/php-latest/composer
