@@ -10,6 +10,8 @@ needs an extension.
 If I forget an extension, feel free to open a pull request or ticket 
 to add it.
 
+**Disclaimer: This image should only be used for local development!**
+
 # What is Composer?
 
 Composer is a tool for dependency management in PHP, written in PHP. 
