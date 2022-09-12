@@ -8,39 +8,11 @@ on:
   workflow_dispatch:
 
 jobs:
-  build-latest:
-    runs-on: ubuntu-latest
-    env:
-      composer: 2
-      php: 8.1
-    steps:
-      - uses: actions/checkout@v3
-      - name: Login to registry
-        run: echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u ${{ github.repository_owner }} --password-stdin
-      - name: Build docker image
-        run: |
-          docker build \
-            --target=composer-with-extensions \
-            --label "org.opencontainers.image.created"="$(date +"%Y-%m-%dT%H:%M:%S%:z")" \
-            --label "org.opencontainers.image.authors"="${{ github.repository_owner }}" \
-            --label "org.opencontainers.image.url"="${{ github.repositoryUrl }}" \
-            --label "org.opencontainers.image.documentation"="${{ github.repositoryUrl }}/README.md" \
-            --label "org.opencontainers.image.source"="${{ github.repositoryUrl }}" \
-            --label "org.opencontainers.image.version"="${{ matrix.composer }}-${{ matrix.php }}" \
-            --label "org.opencontainers.image.revision"="${{ github.sha }}" \
-            --label "org.opencontainers.image.vendor"="${{ github.repository_owner }}" \
-            --label "org.opencontainers.image.licenses"="MIT" \
-            --label "org.opencontainers.image.title"="Composer ${{ matrix.composer }} (build with PHP ${{ matrix.php }})" \
-            --label "org.opencontainers.image.description"="This docker image of composer contains composer with the most used php extensions." \
-            --build-arg PHP_VERSION=${{ matrix.php }} \
-            --build-arg COMPOSER_VERSION=${{ matrix.composer }} \
-            --tag "ghcr.io/iamfj/composer/php-${{ matrix.php }}/composer:latest" \
-            .
-      - name: Publish docker image
-        run: docker push --all-tags
-
   build-matrix:
     runs-on: ubuntu-latest
+    env:
+      LATEST_COMPOSER: 2.4.1
+      LATEST_PHP: 8.1.10
     strategy:
       matrix:
         composer:
@@ -86,5 +58,14 @@ jobs:
             --build-arg COMPOSER_VERSION=${{ matrix.composer }} \
             --tag "ghcr.io/iamfj/composer/php-${{ matrix.php }}/composer:${{ matrix.composer }}" \
             .
+      - name: Tag latest composer image
+        if: ${{ env.LATEST_COMPOSER == matrix.composer }}
+        run: docker tag ghcr.io/iamfj/composer/php-${{ matrix.php }}/composer:${{ matrix.composer }} ghcr.io/iamfj/composer/php-${{ matrix.php }}/composer:latest
+      - name: Tag latest php image
+        if: ${{ env.LATEST_PHP == matrix.php }}
+        run: docker tag ghcr.io/iamfj/composer/php-${{ matrix.php }}/composer:${{ matrix.composer }} ghcr.io/iamfj/composer/php-latest/composer:${{ matrix.composer }}
+      - name: Tag latest composer and php image
+        if: ${{ env.LATEST_COMPOSER == matrix.composer }} && ${{ env.LATEST_PHP == matrix.php }}
+        run: docker tag ghcr.io/iamfj/composer/php-${{ matrix.php }}/composer:${{ matrix.composer }} ghcr.io/iamfj/composer/php-latest/composer:latest
       - name: Publish docker image
         run: docker push --all-tags
