@@ -59,4 +59,5 @@ RUN apk add --no-cache --virtual .build-deps \
       sockets \
     && apk del --no-cache .build-deps
 
+WORKDIR /app
 ENTRYPOINT [ "php", "/usr/bin/composer" ]
