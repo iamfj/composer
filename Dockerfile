@@ -53,6 +53,7 @@ RUN apk add --no-cache --virtual .build-deps \
       sodium \
       xml \
       zip \
+      soap \
     && apk del --no-cache .build-deps
 
 ENTRYPOINT [ "php", "/usr/bin/composer" ]
