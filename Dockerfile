@@ -29,6 +29,7 @@ RUN apk add --no-cache --virtual .build-deps \
       libxml2-dev \
       libsodium-dev \
       libzip-dev \
+      libxslt-dev \
     && pecl install \
       xdebug \
       mongodb \
@@ -54,6 +55,8 @@ RUN apk add --no-cache --virtual .build-deps \
       xml \
       zip \
       soap \
+      xsl \
+      sockets \
     && apk del --no-cache .build-deps
 
 ENTRYPOINT [ "php", "/usr/bin/composer" ]
