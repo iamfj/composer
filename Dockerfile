@@ -10,6 +10,8 @@ FROM composer:${COMPOSER_VERSION} AS composer
 # Composer with Extensions                              #
 #########################################################
 FROM php:${PHP_VERSION}-cli-alpine AS composer-with-extensions
+ENV COMPOSER_ALLOW_SUPERUSER 1
+ENV COMPOSER_HOME /tmp
 COPY --from=composer /usr/bin/composer /usr/bin/composer
 
 RUN apk add --no-cache --virtual .build-deps \
