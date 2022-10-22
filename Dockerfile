@@ -22,6 +22,7 @@ RUN apk add --no-cache --virtual .build-deps \
       autoconf \
       tar \
     && apk add --no-cache \
+      git \
       libpng-dev \
       gettext-dev \
       icu-dev \
